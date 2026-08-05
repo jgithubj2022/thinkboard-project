@@ -30,14 +30,20 @@ export async function createNote(req,res) {//after making model and importing, n
 export async function updateNote(req,res){
     try {
         const {title,content}= req.body;//requests our title and content from our note models schema
-        await Note.findByIdAndUpdate(req.params.id, {title, content});//update params title and content
+        const updatedNote = await Note.findByIdAndUpdate(req.params.id, {title, content},{new:true});//update params title and content
+        //new true param gives us the new node with updated fields but is an optional param
+
+        if (!updatedNote) {//not found or doesnt exist a note with this id
+            return res,status(404).json({message: "Note not found"})//http method error 400's which is clientside error for not foundd
+        } 
         res.status(200).json({message: "Note updated successful"})
+        
     }catch (error) {
         console.error("Error in updateNote controller", error);
         res.status(500).json({message: "Internal server error "});
     }
 };
 
-export const deleteNote = (req,res) => {
+export async function deleteNote(req,res) {
     res.status(200).json({message: "Note successfully deleted"});
 };
