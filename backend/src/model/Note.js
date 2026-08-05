@@ -17,6 +17,6 @@ const noteSchema = new mongoose.Schema({
     {timestamps: true} //createdAt and updatedAt
 );
 
-const Note = mongoose.Model("Note", noteSchema)
+const Note = mongoose.model("Note", noteSchema)
 
 export default Note//create a note model based on the schema above is what this means, and adds timestamp when created

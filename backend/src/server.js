@@ -10,6 +10,9 @@ const PORT = process.env.PORT || 3000;
 
 connectDB()
 
+//middleware, must be before routs
+app.use(express.json())
+
 app.use("/api/notes", notesRoutes)
 // the beauty of this code base is now that we have
 // seperated the routes and controllers from the server file,
