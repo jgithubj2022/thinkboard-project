@@ -26,7 +26,7 @@ app.use((req,res,next) => {
 });//our middleware in this case only acts as a log messanger after the client does a task that forces our controllers to send a request or post to the server
 //then our middleware executes the task in its body before returning the answer visually back to the client from the server
 
-app.use("/api/notes",rateLimiter,notesRoutes);//since express.js reads left->right set rate limiter first 
+app.use("/api/notes",rateLimiter,notesRoutes);//since express.js reads left->right set rate limiter first instead of the notes routes
 
 app.listen(PORT,() => {
     console.log("server started on port:", PORT);
