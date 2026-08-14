@@ -1,3 +1,11 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800;900&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  html { background: hsl(var(--b2)); }
+  body { margin: 0; min-width: 320px; min-height: 100vh; font-family: "DM Sans", system-ui, sans-serif; }
+  button, input, textarea { font: inherit; }
+}
