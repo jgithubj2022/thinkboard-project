@@ -1,19 +1,54 @@
 const API_URL = "http://localhost:5001/api/notes";
 
+const isProtectedUrl = (url = "") =>
+  [
+    "chrome://",
+    "edge://",
+    "opera://",
+    "brave://",
+    "chrome-extension://",
+    "https://chromewebstore.google.com/",
+    "https://chrome.google.com/webstore/"
+  ].some((prefix) => url.startsWith(prefix));
+
+chrome.commands.onCommand.addListener(async (command) => {
+  try {
+    if (command !== "start-voice-note") return;
+
+    const [tab] = await chrome.tabs.query({
+      active: true,
+      currentWindow: true
+    });
+
+    if (!tab?.id || isProtectedUrl(tab.url)) return;
+
+    try {
+      await chrome.tabs.sendMessage(tab.id, {
+        type: "START_VOICE_NOTE"
+      });
+    } catch {
+      await chrome.scripting.executeScript({
+        target: { tabId: tab.id },
+        files: ["overlay.js"]
+      });
+
+      setTimeout(() => {
+        chrome.tabs.sendMessage(tab.id, {
+          type: "START_VOICE_NOTE"
+        }).catch((error) => {
+          console.warn("Could not start voice input:", error.message);
+        });
+      }, 150);
+    }
+  } catch (error) {
+    console.warn("Thinkboard shortcut could not run on this page:", error.message);
+  }
+});
 
 chrome.action.onClicked.addListener(async (tab) => {
   if (!tab.id) return;
 
-  const currentUrl = tab.url || "";
-  const isProtectedPage = currentUrl.startsWith("chrome://") ||
-    currentUrl.startsWith("edge://") ||
-    currentUrl.startsWith("opera://") ||
-    currentUrl.startsWith("brave://") ||
-    currentUrl.startsWith("chrome-extension://") ||
-    currentUrl.startsWith("https://chromewebstore.google.com/") ||
-    currentUrl.startsWith("https://chrome.google.com/webstore/");
-
-  if (isProtectedPage) return;
+  if (isProtectedUrl(tab.url)) return;
 
   try {
     await chrome.scripting.executeScript({
@@ -50,7 +85,9 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
           break;
         case "DELETE_NOTE":
           response = await fetch(`${API_URL}/${message.id}`, {
-            method: "DELETE"
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({})
           });
           break;
         default:

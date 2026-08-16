@@ -1,7 +1,8 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { ArrowLeft, LayoutDashboard, Minus, Plus, Save, X } from "lucide-react";
 import NoteCard from "./components/NoteCard";
+import VoiceController from "./components/VoiceController";
 import styles from "./index.css?inline";
 
 const HOST_ID = "thinkboard-notes-extension";
@@ -47,7 +48,6 @@ if (existingHost) {
     }
   }
 }
-
 function ThinkboardOverlay({ onClose }) {
   const [notes, setNotes] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -56,6 +56,7 @@ function ThinkboardOverlay({ onClose }) {
   const [form, setForm] = useState({ id: null, title: "", content: "" });
   const [saving, setSaving] = useState(false);
   const [minimized, setMinimized] = useState(false);
+  const [voiceStartRequest, setVoiceStartRequest] = useState(0);
   const [position, setPosition] = useState(() => ({
     x: Math.max(16, window.innerWidth - 436),
     y: Math.max(16, window.innerHeight - 656),
@@ -79,6 +80,26 @@ function ThinkboardOverlay({ onClose }) {
       setLoading(false);
     }
   };
+
+  const createVoiceNote = useCallback(async (note) => {
+    const result = await chrome.runtime.sendMessage({ type: "CREATE_NOTE", note });
+    if (!result?.ok) throw new Error(result?.error || "The voice note could not be saved");
+    setNotes((current) => [result.data, ...current]);
+  }, []);
+
+  useEffect(() => {
+    const handleMessage = (message) => {
+      if (message.type === "START_VOICE_NOTE") {
+        setVoiceStartRequest((current) => current + 1);
+      }
+    };
+
+    chrome.runtime.onMessage.addListener(handleMessage);
+
+    return () => {
+      chrome.runtime.onMessage.removeListener(handleMessage);
+    };
+  }, []);
 
   useEffect(() => { loadNotes(); }, []);
 
@@ -153,11 +174,11 @@ function ThinkboardOverlay({ onClose }) {
       className={[
         "card pointer-events-auto fixed isolate z-[2147483647]",
         "overflow-hidden border border-base-content/10",
-        "bg-white font-sans text-base-content opacity-100 shadow-2xl",
+        "!bg-white font-sans !text-black opacity-100 shadow-2xl",
         "transition-[width,height] duration-200",
 
         minimized
-          ? "h-[58px] min-h-[58px] w-[300px] min-w-[300px] resize-none" //minimized state
+          ? "h-[58px] min-h-[58px] max-h-[58px] w-[300px] min-w-[300px] max-w-[300px] resize-none"//minimized state
           : [ //expanded state
               "h-[min(620px,calc(100vh-32px))]",
               "min-h-[280px]",
@@ -166,11 +187,15 @@ function ThinkboardOverlay({ onClose }) {
               "resize"
             ].join(" ")
       ].join(" ")}
+      style={{
+        left: `${position.x}px`,
+        top: `${position.y}px`
+      }}
     >
-      <header className="navbar min-h-[58px] cursor-grab select-none gap-3 border-b border-base-content/10 bg-white px-3 py-2 active:cursor-grabbing" onPointerDown={startDrag}>
+      <header className="navbar min-h-[58px] cursor-grab select-none gap-3 border-b border-black/10 !bg-white !text-black px-3 py-2 active:cursor-grabbing" onPointerDown={startDrag}>
         <div className="flex min-w-0 flex-1 items-center gap-2">
           <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-primary text-primary-content"><LayoutDashboard className="size-4" /></span>
-          <div className="min-w-0"><h1 className="truncate text-sm font-black tracking-tight">Thinkboard Notes</h1><p className="text-[11px] text-base-content/50">{notes.length} {notes.length === 1 ? "note" : "notes"}</p></div>
+          <div className="min-w-0"><h1 className="truncate text-sm font-black tracking-tight text-black">Thinkboard Notes</h1><p className="text-[11px] text-black/50">{notes.length} {notes.length === 1 ? "note" : "notes"}</p></div>
         </div>
         <div className="flex" onPointerDown={(event) => event.stopPropagation()}>
           <button className="btn btn-ghost btn-circle btn-sm" onClick={() => setMinimized((value) => !value)} aria-label="Minimize Thinkboard"><Minus className="size-4" /></button>
@@ -194,6 +219,10 @@ function ThinkboardOverlay({ onClose }) {
               <div><p className="text-xs font-bold uppercase tracking-[0.18em] text-primary">Your workspace</p><h2 className="mt-1 text-2xl font-black tracking-tight">Notes worth keeping.</h2></div>
               <button className="btn btn-primary btn-sm shrink-0" onClick={openCreate}><Plus className="size-4" />New</button>
             </div>
+            <VoiceController
+              onCreateNote={createVoiceNote}
+              startRequest={voiceStartRequest}
+            />
             {loading ? <div className="grid gap-3">{[1, 2].map((item) => <div key={item} className="skeleton h-40 rounded-2xl" />)}</div>
               : notes.length ? <div className="grid gap-3">{notes.map((note) => <NoteCard key={note._id} note={note} onOpen={openNote} onDelete={deleteNote} />)}</div>
               : <div className="rounded-2xl border border-dashed border-base-300 bg-base-100 p-8 text-center"><p className="font-bold">Your board is ready</p><p className="mt-1 text-sm text-base-content/55">Create your first note.</p><button className="btn btn-primary btn-sm mt-4" onClick={openCreate}><Plus className="size-4" />Create note</button></div>}

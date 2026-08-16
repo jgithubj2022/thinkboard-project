@@ -18,8 +18,6 @@ app.use(express.json());//this middleware parses the JSON bodies: allows us to d
 // it ensures req.headers["x-forwarded-for"] returns the real client IP instead of the proxy's ip.
 app.set("trust proxy", 1); 
 
-app.use(rateLimiter);
-
 app.use((req,res,next) => {
     console.log(`Req method is ${req.method} & Requests URL is ${req.url}`);
     next();

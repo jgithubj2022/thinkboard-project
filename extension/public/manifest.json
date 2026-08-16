@@ -21,5 +21,14 @@
   "background": {
     "service_worker": "background.js",
     "type": "module"
+  },
+  "commands": {
+  "start-voice-note": {
+    "suggested_key": {
+      "default": "Alt+V",
+      "mac": "Alt+V"
+    },
+    "description": "Start a Thinkboard voice note"
   }
+}
 }
