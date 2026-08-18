@@ -1,6 +1,6 @@
 # Think Board
 
-Think Board is a full-stack note-taking application that keeps a browser-based workspace and a Chrome extension connected to the same set of notes. I built it to practice carrying a feature across a React interface, an Express API, and MongoDB rather than stopping at a standalone front end.
+Think Board is a full-stack note taking application that keeps a browser workspace and a Chrome extension connected to the same set of notes. I built it to practice carrying a feature across a React interface, an Express API, and MongoDB rather than stopping at a standalone front end.
 
 The web app supports creating, reading, updating, and deleting notes. The companion extension opens a draggable, resizable panel over the current webpage, so notes can be reviewed or changed without switching tabs. It also uses the browser Speech Recognition API to turn the phrase “create note…” and the words that follow it into a saved note.
 
@@ -8,10 +8,10 @@ The web app supports creating, reading, updating, and deleting notes. The compan
 
 ## What I implemented
 
-- A responsive React board with loading states, form validation, notifications, note counts, and newest-first ordering
+- A responsive React board with loading states, form validation, notifications, note counts, and newest first ordering
 - REST endpoints for note creation, retrieval, updates, and deletion with Express and Mongoose
 - Shared MongoDB data between the website and extension
-- IP-based API rate limiting with Upstash Redis, including HTTP rate-limit headers and a retry state in the UI
+- IP-based API rate limiting with Upstash Redis, including HTTP rate limit headers and a retry state in the UI
 - A Manifest V3 Chrome extension that injects a React overlay through Shadow DOM to reduce style conflicts with the host page
 - Extension controls for dragging, resizing, minimizing, creating, editing, and deleting notes
 - Voice note capture through the Web Speech API, available from the panel or the `Alt+V` shortcut
@@ -25,7 +25,7 @@ The extension retrieves the same notes as the main board and provides the full n
 
 ### Voice capture
 
-Selecting the microphone—or pressing `Alt+V`—starts speech recognition. Saying “create note” followed by the note text saves the transcript through the same API used by the web application.
+Selecting the microphone or pressing `Alt+V` starts speech recognition. Saying “create note” followed by the note text saves the transcript through the same API used by the web application.
 
 ![Voice capture listening in the extension](docs/images/thinkboard-voice-capture.png)
 
@@ -39,7 +39,7 @@ The dedicated forms validate required content, report request failures, and retu
 
 ## Built with
 
-- React 19, React Router, Axios, and Vite
+- React , React Router, Axios, and Vite
 - Tailwind CSS, daisyUI, and Lucide icons
 - Node.js, Express, and Mongoose
 - MongoDB and Upstash Redis
@@ -121,4 +121,4 @@ Voice capture depends on browser support for the Web Speech API and microphone p
 
 ## Skills demonstrated
 
-This project demonstrates component-based UI development, client-side routing, REST API design, asynchronous request handling, MongoDB data modeling, middleware, environment configuration, browser-extension development, and debugging across a three-part JavaScript application.
+This project was mad fun led by component based UI development, client-side routing, REST API design, asynchronous request handling, MongoDB data modeling, middleware, environment configuration, browser-extension development, and debugging across a three part JavaScript application. During this applications backend production I focused on applying rate limiting to build my understanding of necessary website restrictions along with making sure my API had the correct catch and HTTP status codes to ensure a professional development process.
